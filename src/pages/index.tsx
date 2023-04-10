@@ -34,6 +34,9 @@ export default function Home() {
         <a href="/notification" className="border-white bg-primary ">
           Push Protcol
         </a>
+        <a href="/huddle" className="border-white bg-primary ">
+          Huddle01
+        </a>
       </div>
     </main>
   )
