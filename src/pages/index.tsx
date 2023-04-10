@@ -14,39 +14,6 @@ import { useState } from 'react'
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-  const [message, setMessage] = useState<string>()
-  const [title, setTitle] = useState<string>()
-  const address = useAddress()
-  const signer = useSigner()
-  const fetchNotification = async () => {
-    const res = await axios.get(`/api/push?address=${address}`)
-    console.log(res.data.message)
-  }
-  const pushNotification = async () => {
-    const res = await axios.post(`/api/push`, {
-      title,
-      message,
-    })
-    console.log(res.data.message)
-  }
-  const handleOptIn = async () => {
-    if (signer) {
-      await PushAPI.channels.subscribe({
-        signer: signer as SignerType,
-        channelAddress: `eip155:${ChainId.Goerli}:0x785a58b8A172e98756b8CeCaD674ab35da4e380e`, // channel address in CAIP
-        userAddress: `eip155:${ChainId.Goerli}:${address}`, // user address in CAIP
-        onSuccess: () => {
-          console.log('opt in success')
-        },
-        onError: () => {
-          console.error('opt in error')
-        },
-        // @ts-ignore
-        env: 'staging',
-      })
-    }
-  }
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -62,56 +29,11 @@ export default function Home() {
           height={37}
           priority
         />
-        {address ? (
-          <>
-            <div className="flex flex-col gap-2">
-              <button
-                className="bg-blue-400 hover:bg-blue-300 text-white rounded px-4 py-2"
-                onClick={handleOptIn}
-              >
-                Opt-In
-              </button>
-              <button
-                className="bg-green-500 hover:bg-green-400 text-white rounded px-4 py-2"
-                onClick={fetchNotification}
-              >
-                fetchNotification
-              </button>
-            </div>
-          </>
-        ) : (
-          <ConnectWallet />
-        )}
       </div>
-
-      <div className="mb-32 flex flex-row text-center mt-12">
-        <div>
-          <h2 className={`${inter.className} mb-3 text-2xl font-semibold`}>
-            Notify
-          </h2>
-          <div className="flex flex-col gap-4">
-            <input
-              type="text"
-              className="border-white block pl-2 py-1 text-black"
-              id="exampleFormControlInputText"
-              placeholder="Title"
-              onChange={(e) => setTitle(e.target.value)}
-            />
-            <input
-              type="text"
-              className="border-white block pl-2 py-1 h-24 text-black"
-              id="exampleFormControlInputText"
-              placeholder="Message"
-              onChange={(e) => setMessage(e.target.value)}
-            />
-            <button
-              onClick={pushNotification}
-              className="bg-blue-500 hover:bg-blue-400 text-white rounded px-4 py-2 w-full"
-            >
-              Send
-            </button>
-          </div>
-        </div>
+      <div>
+        <a href="/notification" className="border-white bg-primary ">
+          Push Protcol
+        </a>
       </div>
     </main>
   )
