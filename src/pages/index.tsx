@@ -1,9 +1,43 @@
+import * as PushAPI from '@pushprotocol/restapi'
+import * as ethers from 'ethers'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
+import {
+  ChainId,
+  ConnectWallet,
+  useAddress,
+  useSigner,
+} from '@thirdweb-dev/react'
+import { SignerType } from '@pushprotocol/restapi'
+import axios from 'axios'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
+  const address = useAddress()
+  const signer = useSigner()
+  const fetchNotification = async () => {
+    const res = await axios.get(`/api/push?address=${address}`)
+    console.log(res.data.message)
+  }
+  const handleOptIn = async () => {
+    if (signer) {
+      await PushAPI.channels.subscribe({
+        signer: signer as SignerType,
+        channelAddress: `eip155:${ChainId.Goerli}:0x785a58b8A172e98756b8CeCaD674ab35da4e380e`, // channel address in CAIP
+        userAddress: `eip155:${ChainId.Goerli}:${address}`, // user address in CAIP
+        onSuccess: () => {
+          console.log('opt in success')
+        },
+        onError: () => {
+          console.error('opt in error')
+        },
+        // @ts-ignore
+        env: 'staging',
+      })
+    }
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -31,7 +65,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
+      <div className="flex-col gap-10 relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
         <Image
           className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
           src="/next.svg"
@@ -40,6 +74,21 @@ export default function Home() {
           height={37}
           priority
         />
+        {address ? (
+          <>
+            <button className="border-solid" onClick={handleOptIn}>
+              Opt-In
+            </button>
+            <button
+              className="bg-gray-900 hover:bg-gray-800 text-white rounded px-4 py-2"
+              onClick={fetchNotification}
+            >
+              fetchNotification
+            </button>
+          </>
+        ) : (
+          <ConnectWallet />
+        )}
       </div>
 
       <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">

@@ -6,17 +6,19 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<any>
 ) {
-  const { title, message } = req.query
   switch (req.method) {
     case 'POST': {
+      const { title, message } = req.body
+      console.log(title)
       const Pkey = process.env.PRIVATE_KEY || ''
       const _signer = new ethers.Wallet(Pkey)
       sendNotification(title as string, message as string, _signer)
       return res.status(200).json({ status: 'Success' })
     }
     case 'GET': {
+      const { address } = req.query
       const notifications = await PushAPI.user.getFeeds({
-        user: 'eip155:5:0x785a58b8A172e98756b8CeCaD674ab35da4e380e', // user address in CAIP
+        user: `eip155:5:${address}`, // user address in CAIP
         raw: true,
         // @ts-ignore
         env: 'staging',
