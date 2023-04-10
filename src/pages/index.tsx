@@ -10,6 +10,7 @@ import {
 import { SignerType } from '@pushprotocol/restapi'
 import axios from 'axios'
 import { useState } from 'react'
+import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -31,12 +32,12 @@ export default function Home() {
         />
       </div>
       <div>
-        <a href="/notification" className="border-white bg-primary ">
+        <Link href="/notification" className="border-white bg-primary ">
           Push Protcol
-        </a>
-        <a href="/huddle" className="border-white bg-primary ">
+        </Link>
+        <Link href="/huddle" className="border-white bg-primary ">
           Huddle01
-        </a>
+        </Link>
       </div>
     </main>
   )
