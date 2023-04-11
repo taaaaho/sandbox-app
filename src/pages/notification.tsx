@@ -10,6 +10,7 @@ import {
 import { SignerType } from '@pushprotocol/restapi'
 import axios from 'axios'
 import { useState } from 'react'
+import { useSDKSocket } from '@/hooks/useSDKSocket'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,6 +19,13 @@ export default function Home() {
   const [title, setTitle] = useState<string>()
   const address = useAddress()
   const signer = useSigner()
+  const socketData = useSDKSocket({
+    account: address,
+    chainId: ChainId.Goerli,
+    env: 'staging',
+    isCAIP: false,
+  })
+
   const fetchNotification = async () => {
     const res = await axios.get(`/api/push?address=${address}`)
     console.log(res.data.message)
@@ -44,6 +52,14 @@ export default function Home() {
         // @ts-ignore
         env: 'staging',
       })
+    }
+  }
+
+  const toggleSocketConnection = () => {
+    if (!socketData.pushSDKSocket?.connected) {
+      socketData.pushSDKSocket?.connect()
+    } else {
+      socketData.pushSDKSocket?.disconnect()
     }
   }
 
@@ -110,6 +126,19 @@ export default function Home() {
             >
               Send
             </button>
+
+            <button
+              onClick={toggleSocketConnection}
+              className="bg-blue-500 hover:bg-blue-400 text-white rounded px-4 py-2 w-full"
+            >
+              Socket
+            </button>
+            <div className="text-white">
+              {String(socketData.isSDKSocketConnected)}
+            </div>
+            <pre style={{ color: 'green' }}>
+              {JSON.stringify(socketData.feedsSinceLastConnection, null, 4)}
+            </pre>
           </div>
         </div>
       </div>
