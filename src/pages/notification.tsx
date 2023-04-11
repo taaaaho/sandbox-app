@@ -30,10 +30,20 @@ export default function Home() {
     const res = await axios.get(`/api/push?address=${address}`)
     console.log(res.data.message)
   }
-  const pushNotification = async () => {
+  const pushBroadcast = async () => {
     const res = await axios.post(`/api/push`, {
       title,
       message,
+      kind: 'broadcast',
+    })
+    console.log(res.data.message)
+  }
+  const pushTarget = async () => {
+    const res = await axios.post(`/api/push`, {
+      title,
+      message,
+      kind: 'target',
+      recipient: address,
     })
     console.log(res.data.message)
   }
@@ -121,10 +131,16 @@ export default function Home() {
               onChange={(e) => setMessage(e.target.value)}
             />
             <button
-              onClick={pushNotification}
+              onClick={pushBroadcast}
               className="bg-blue-500 hover:bg-blue-400 text-white rounded px-4 py-2 w-full"
             >
-              Send
+              Send Broadcast
+            </button>
+            <button
+              onClick={pushTarget}
+              className="bg-blue-500 hover:bg-blue-400 text-white rounded px-4 py-2 w-full"
+            >
+              Send Target
             </button>
 
             <button
