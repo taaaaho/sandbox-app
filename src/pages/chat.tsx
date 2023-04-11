@@ -13,7 +13,35 @@ const inter = Inter({ subsets: ['latin'] })
 export default function Home() {
   const address = useAddress()
   const signer = useSigner()
-  const handleUser = async () => {
+  const handleSendChat = async () => {
+    // pre-requisite API calls that should be made before
+    // need to get user and through that encryptedPvtKey of the user
+    const user = await PushAPI.user.get({
+      account: `eip155:${address}`,
+      // @ts-ignore
+      env: 'staging',
+    })
+
+    // need to decrypt the encryptedPvtKey to pass in the api using helper function
+    const pgpDecryptedPvtKey = await PushAPI.chat.decryptPGPKey({
+      encryptedPGPPrivateKey: user.encryptedPrivateKey,
+      signer: signer as SignerType,
+      // @ts-ignore
+      env: 'staging',
+    })
+
+    // actual api
+    const response = await PushAPI.chat.send({
+      messageContent: "Gm gm! It's me... Mario",
+      messageType: 'Text', // can be "Text" | "Image" | "File" | "GIF"
+      receiverAddress: 'eip155:0x319a1b3D651695B2d69ccDfD98Bf94F2B839A77d',
+      signer: signer as SignerType,
+      pgpPrivateKey: pgpDecryptedPvtKey,
+      // @ts-ignore
+      env: 'staging',
+    })
+  }
+  const handleFetchChat = async () => {
     // const user = await PushAPI.user.create({
     //   account: address,
     // })
@@ -81,10 +109,16 @@ export default function Home() {
         />
       </div>
       <button
-        onClick={handleUser}
+        onClick={handleFetchChat}
         className="bg-blue-500 hover:bg-blue-400 text-white rounded px-4 py-2 w-full"
       >
-        User
+        Fetch
+      </button>
+      <button
+        onClick={handleSendChat}
+        className="bg-blue-500 hover:bg-blue-400 text-white rounded px-4 py-2 w-full"
+      >
+        Send
       </button>
       <div>
         {address && (
