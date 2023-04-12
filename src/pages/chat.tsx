@@ -1,18 +1,42 @@
 import * as PushAPI from '@pushprotocol/restapi'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
-import Link from 'next/link'
 import { Chat } from '@pushprotocol/uiweb'
-import { ITheme } from '@pushprotocol/uiweb'
-import { useAddress, useSigner, useWallet } from '@thirdweb-dev/react'
-import { Signer } from 'ethers'
+import { useAddress, useSigner } from '@thirdweb-dev/react'
 import { SignerType } from '@pushprotocol/restapi'
+import { useState } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   const address = useAddress()
   const signer = useSigner()
+  const [pgpDecryptedPvtKey, setPgpDecryptedPvtKey] = useState()
+
+  /**
+   * 署名が必要なため、一度作成したらStateで管理
+   * @returns
+   */
+  const fetchPgpDecryptedPvtKey = async () => {
+    if (pgpDecryptedPvtKey) {
+      return pgpDecryptedPvtKey
+    } else {
+      const user = await PushAPI.user.get({
+        account: `eip155:${address}`,
+        // @ts-ignore
+        env: 'staging',
+      })
+      const pgpDecryptedPvtKey = await PushAPI.chat.decryptPGPKey({
+        encryptedPGPPrivateKey: user.encryptedPrivateKey,
+        signer: signer as SignerType,
+        // @ts-ignore
+        env: 'staging',
+      })
+      setPgpDecryptedPvtKey(pgpDecryptedPvtKey)
+      return pgpDecryptedPvtKey
+    }
+  }
+
   const handleSendChat = async () => {
     // pre-requisite API calls that should be made before
     // need to get user and through that encryptedPvtKey of the user
@@ -23,12 +47,7 @@ export default function Home() {
     })
 
     // need to decrypt the encryptedPvtKey to pass in the api using helper function
-    const pgpDecryptedPvtKey = await PushAPI.chat.decryptPGPKey({
-      encryptedPGPPrivateKey: user.encryptedPrivateKey,
-      signer: signer as SignerType,
-      // @ts-ignore
-      env: 'staging',
-    })
+    const pgpDecryptedPvtKey = await fetchPgpDecryptedPvtKey()
 
     // actual api
     const response = await PushAPI.chat.send({
@@ -52,12 +71,7 @@ export default function Home() {
     })
     console.log(user)
 
-    const pgpDecryptedPvtKey = await PushAPI.chat.decryptPGPKey({
-      encryptedPGPPrivateKey: user.encryptedPrivateKey,
-      signer: signer as SignerType,
-      // @ts-ignore
-      env: 'staging',
-    })
+    const pgpDecryptedPvtKey = await fetchPgpDecryptedPvtKey()
     // console.log(pgpDecryptedPvtKey)
 
     // conversation hash are also called link inside chat messages
