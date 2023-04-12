@@ -1,37 +1,37 @@
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
-import { useHuddle01 } from '@huddle01/react'
-import { useEffect, useState } from 'react'
+import { useEventListener, useHuddle01 } from '@huddle01/react'
+import { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
-import { useLobby, useAudio, useVideo, useRoom } from '@huddle01/react/hooks'
+import { useMeetingMachine } from '@huddle01/react/hooks'
 import { HuddleIframe, IframeConfig } from '@huddle01/huddle01-iframe'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   const [roomId, setRoomId] = useState<string>()
-  const { initialize, isInitialized } = useHuddle01()
-  // const { joinLobby } = useLobby()
-  // const { joinRoom, leaveRoom } = useRoom()
+  const fetchIframeConfig = () => {
+    return {
+      roomUrl: `https://iframe.huddle01.com/`,
+      height: '800px',
+      width: '1000px',
+      noBorder: false,
+    }
+  }
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const { state, send } = useMeetingMachine()
 
-  // const {
-  //   fetchAudioStream,
-  //   stopAudioStream,
-  //   error: micError,
-  //   produceAudio,
-  //   stopProducingAudio,
-  // } = useAudio()
-  // const {
-  //   fetchVideoStream,
-  //   stopVideoStream,
-  //   error: camError,
-  //   produceVideo,
-  //   stopProducingVideo,
-  // } = useVideo()
+  // Event Listner
+  useEventListener('lobby:cam-on', () => {
+    if (state.context.camStream && videoRef.current)
+      videoRef.current.srcObject = state.context.camStream as MediaStream
+  })
+  const { initialize, isInitialized } = useHuddle01()
 
   const handleCreateRoom = async () => {
     const res = await axios.post('/api/createRoom')
-    console.log(res.data)
+    console.log(res.data.data.roomId)
+
     setRoomId(res.data.data.roomId)
   }
   useEffect(() => {
@@ -62,67 +62,7 @@ export default function Home() {
               {roomId ? (
                 <div className="flex flex-col gap-4">
                   <div>Room ID: {roomId}</div>
-                  <HuddleIframe
-                    config={{
-                      roomUrl: `https://iframe.huddle01.com/${roomId}`,
-                      height: '800px',
-                      width: '1000px',
-                      noBorder: true,
-                    }}
-                  />
-                  {/* <button
-                    disabled={joinLobby.isCallable}
-                    onClick={() => joinLobby(roomId)}
-                  >
-                    Join Lobby
-                  </button>
-                  <button
-                    disabled={!fetchAudioStream.isCallable}
-                    onClick={fetchAudioStream}
-                  >
-                    FETCH_AUDIO_STREAM
-                  </button>
-
-                  <button
-                    disabled={!fetchVideoStream.isCallable}
-                    onClick={fetchVideoStream}
-                  >
-                    FETCH_VIDEO_STREAM
-                  </button>
-                  <button disabled={!joinRoom.isCallable} onClick={joinRoom}>
-                    JOIN_ROOM
-                  </button>
-
-                  <button disabled={!leaveRoom.isCallable} onClick={leaveRoom}>
-                    LEAVE_ROOM
-                  </button> */}
-                  {/* <button
-                    disabled={!produceVideo.isCallable}
-                    onClick={() => produceVideo(camStream)}
-                  >
-                    Produce Cam
-                  </button>
-
-                  <button
-                    disabled={!produceAudio.isCallable}
-                    onClick={() => produceAudio(micStream)}
-                  >
-                    Produce Mic
-                  </button>
-
-                  <button
-                    disabled={!stopProducingVideo.isCallable}
-                    onClick={stopProducingVideo}
-                  >
-                    Stop Producing Cam
-                  </button>
-
-                  <button
-                    disabled={!stopProducingAudio.isCallable}
-                    onClick={stopProducingAudio}
-                  >
-                    Stop Producing Mic
-                  </button> */}
+                  <HuddleIframe config={fetchIframeConfig()} />
                 </div>
               ) : (
                 <>
