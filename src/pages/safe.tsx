@@ -12,7 +12,7 @@ const SafePage = () => {
   const signer = useSigner()
 
   const fetchPendingTransactionHash = async () => {
-    const safeService = fetchSafeSrtvice()
+    const safeService = fetchSafeService()
     const safeAddress = '0x06AaC35a667C00761947286496D06100D6A714E0'
     if (safeService && signer) {
       const pendingTransactions = await safeService.getPendingTransactions(
@@ -37,7 +37,7 @@ const SafePage = () => {
       return safeSdk
     }
   }
-  const fetchSafeSrtvice = () => {
+  const fetchSafeService = () => {
     if (signer) {
       const ethAdapterOwner1 = new EthersAdapter({
         ethers,
@@ -53,7 +53,7 @@ const SafePage = () => {
   }
 
   const executeTransaction = async () => {
-    const safeService = fetchSafeSrtvice()
+    const safeService = fetchSafeService()
     const safeSdk = await fetchSafeSDK()
     const safeTxHash = await fetchPendingTransactionHash()
     if (safeService && safeSdk && safeTxHash) {
@@ -69,7 +69,7 @@ const SafePage = () => {
   }
   //   出金承認（Owner 2）
   const confirmTransaction = async () => {
-    const safeService = fetchSafeSrtvice()
+    const safeService = fetchSafeService()
     const safeAddress = '0x06AaC35a667C00761947286496D06100D6A714E0'
     const safeTxHash = await fetchPendingTransactionHash()
     if (safeService && signer && safeTxHash) {
@@ -96,7 +96,7 @@ const SafePage = () => {
     // Any address can be used. In this example you will use vitalik.eth
     const destination = '0x785a58b8A172e98756b8CeCaD674ab35da4e380e'
     const amount = ethers.utils.parseUnits('0.001', 'ether').toString()
-    const safeService = fetchSafeSrtvice()
+    const safeService = fetchSafeService()
     const safeSdk = await fetchSafeSDK()
     const safeTransactionData: SafeTransactionDataPartial = {
       to: destination,
@@ -126,7 +126,7 @@ const SafePage = () => {
     }
   }
   const fetchSafe = async () => {
-    const safeService = fetchSafeSrtvice()
+    const safeService = fetchSafeService()
     if (address && safeService) {
       const safe = await safeService.getSafesByOwner(address)
       console.log(safe)
